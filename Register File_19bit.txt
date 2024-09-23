@@ -1,0 +1,47 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+-- Entity declaration for the register file
+entity register_file is
+    Port(
+        clk : in std_logic;                  -- Clock signal
+        rst : in std_logic;                  -- Reset signal
+        reg_write : in std_logic;            -- Register write enable
+        read_reg1 : in std_logic_vector(2 downto 0); -- Register address to read from (1)
+        read_reg2 : in std_logic_vector(2 downto 0); -- Register address to read from (2)
+        write_reg : in std_logic_vector(2 downto 0); -- Register address to write to
+        write_data : in std_logic_vector(18 downto 0); -- Data to write to the register
+        read_data1 : out std_logic_vector(18 downto 0); -- Data read from register 1
+        read_data2 : out std_logic_vector(18 downto 0)  -- Data read from register 2
+    );
+end entity;
+
+-- Architecture definition for the register file
+architecture Behavioral of register_file is
+
+    -- Declare an array of 8 registers, each 19 bits wide
+    type reg_array is array(0 to 7) of std_logic_vector(18 downto 0);
+    signal regs : reg_array := (others => (others => '0'));  -- Initialize all registers to zero
+
+begin
+
+    -- Process to handle register read/write operations
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                -- Reset all registers on reset
+                regs <= (others => (others => '0'));
+            elsif reg_write = '1' then
+                -- Write data to the specified register
+                regs(to_integer(unsigned(write_reg))) <= write_data;
+            end if;
+        end if;
+    end process;
+
+    -- Output the data from the two registers
+    read_data1 <= regs(to_integer(unsigned(read_reg1)));  -- Output data from register 1
+    read_data2 <= regs(to_integer(unsigned(read_reg2)));  -- Output data from register 2
+
+end Behavioral;
